@@ -13,6 +13,13 @@ import android.widget.TextView;
 import java.util.Random;
 
 public class MainActivity extends AppCompatActivity {
+    public int tScore=0;
+    private Button buttonLeft;
+    private Button buttonMiddle;
+    private Button buttonRight;
+    private static final String TAG = "TripleButton";
+
+
 
     /* Hint
         - The function setNewMole() uses the Random class to generate a random value ranged from 0 to 2.
@@ -27,6 +34,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        buttonLeft=(Button)findViewById(R.id.Button1) ;
+        buttonMiddle=(Button)findViewById(R.id.Button2) ;
+        buttonRight=(Button)findViewById(R.id.Button3) ;
 
         Log.v(TAG, "Finished Pre-Initialisation!");
 
@@ -37,6 +47,27 @@ public class MainActivity extends AppCompatActivity {
         super.onStart();
         setNewMole();
         Log.v(TAG, "Starting GUI!");
+        buttonLeft.setOnClickListener(new View.OnClickListener(){
+            public void onClick(View v){
+                Log.v(TAG, "ButtonLeft click,validating");
+                doCheck(buttonLeft);
+            }
+        });
+
+        buttonMiddle.setOnClickListener(new View.OnClickListener(){
+            public void onClick(View v){
+                Log.v(TAG, "ButtonMiddle click,validating");
+                doCheck(buttonMiddle);
+            }
+        });
+
+        buttonRight.setOnClickListener(new View.OnClickListener(){
+            public void onClick(View v){
+                Log.v(TAG, "ButtonRight click,validate");
+                doCheck(buttonRight);
+            }
+        });
+
     }
     @Override
     protected void onPause(){
@@ -51,27 +82,81 @@ public class MainActivity extends AppCompatActivity {
         finish();
     }
 
-    private void doCheck(Button checkButton) {
-        /* Checks for hit or miss and if user qualify for advanced page.
-            Triggers nextLevelQuery().
-         */
-    }
 
-    private void nextLevelQuery(){
+
+    private void nextLevelQuery() {
         /*
         Builds dialog box here.
         Log.v(TAG, "User accepts!");
         Log.v(TAG, "User decline!");
         Log.v(TAG, "Advance option given to user!");
         belongs here*/
+        AlertDialog.Builder builder=new AlertDialog.Builder(this);
+        builder.setMessage("Would you like to play advanced whack a mole?");
+        builder.setCancelable(false);
+        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                Log.v(TAG,"User accepts");
+                nextLevel();
+            }
+        });
+        builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                Log.v(TAG,"User reject");
+            }
+        });
+        AlertDialog alert=builder.create();
+        alert.setTitle("Enter advanced whack a mole");
+        alert.show();
     }
 
-    private void nextLevel(){
+
+    private void nextLevel() {
         /* Launch advanced page */
+        Intent nextPage=new Intent(MainActivity.this,Main2Activity.class);
+        nextPage.putExtra("Score",tScore);
+        Log.v(TAG,"Sending score");
+        startActivity(nextPage);
+
     }
 
     private void setNewMole() {
-        Random ran = new Random();
-        int randomLocation = ran.nextInt(3);
+        Random rand = new Random();
+        int randomNum = rand.nextInt(3);
+        if (randomNum == 0) {
+            buttonLeft.setText("*");
+            buttonMiddle.setText("O");
+            buttonRight.setText("O");
+        } else if (randomNum == 1) {
+            buttonLeft.setText("O");
+            buttonMiddle.setText("*");
+            buttonRight.setText("O");
+        } else {
+            buttonLeft.setText("O");
+            buttonMiddle.setText("O");
+            buttonRight.setText("*");
+        }
     }
+    private void doCheck(Button bCheck) {
+        String select=bCheck.getText().toString();
+        if(select == "*"){
+            Log.v(TAG, "Score add");
+            tScore += 1;
+            setNewMole();
+
+            if (tScore %10==0){
+                nextLevelQuery();
+            }
+        }
+        else{
+            if (tScore >0){
+                tScore -= 1;
+            }
+            Log.v(TAG, "Minus score");
+            setNewMole();
+        }
+    }
+
 }
